@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+
+  <!-- SEO & Meta Tags -->
+  <title>Interactive Cursor Snake | Physics Simulation &amp; Game</title>
+  <meta name="title" content="Interactive Cursor Snake | Physics Simulation &amp; Game" />
+  <meta name="description" content="A fluid, segmented neon snake that follows your mouse cursor with inverse kinematics, slither physics, customizable skins, and mini-game modes." />
+  <meta name="author" content="Harsh Sigar" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Interactive Cursor Snake | Physics Simulation &amp; Game" />
+  <meta property="og:description" content="A segmented neon snake that follows your cursor with realistic kinematics, particle trails, and interactive game modes." />
+  <meta property="og:image" content="./assets/preview.svg" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="./assets/favicon.svg" />
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+
+  <!-- Fullscreen Interactive Canvas -->
+  <canvas id="snakeCanvas"></canvas>
+
+  <!-- Top Floating HUD -->
+  <header class="hud-top" role="toolbar" aria-label="Snake Controls">
+    <div class="hud-brand">
+      <span>🐍 cursor<span style="color: #ffffff;">.snake</span></span>
+    </div>
+
+    <!-- Mode Selector -->
+    <div class="hud-modes" role="tablist">
+      <button class="mode-btn active" data-mode="slither" role="tab">Free Slither</button>
+      <button class="mode-btn" data-mode="feast" role="tab">Feast Mode</button>
+      <button class="mode-btn" data-mode="swarm" role="tab">Swarm</button>
+    </div>
+
+    <!-- Action Icons -->
+    <div class="hud-actions">
+      <!-- Sound Toggle -->
+      <button class="hud-icon-btn active" id="soundToggle" title="Toggle Sound" aria-label="Toggle Sound">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+      </button>
+
+      <!-- Settings & Skins -->
+      <button class="hud-icon-btn" id="settingsToggle" title="Skins &amp; Settings" aria-label="Skins and Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"></circle>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+        </svg>
+      </button>
+
+      <!-- Fullscreen -->
+      <button class="hud-icon-btn" id="fullscreenToggle" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Feast Mode Score HUD (Hidden in Free Slither) -->
+  <div class="hud-stats" id="statsHud" style="display: none;">
+    <div class="stat-pill">
+      <span>Score:</span>
+      <span class="stat-val" id="scoreVal">0</span>
+    </div>
+    <div class="stat-pill">
+      <span>Length:</span>
+      <span class="stat-val" id="lengthVal">45</span>
+    </div>
+    <div class="stat-pill boost-meter">
+      <span>⚡ TURBO BOOST ACTIVE</span>
+    </div>
+  </div>
+
+  <!-- Bottom Instructions Hint -->
+  <footer class="hud-bottom-hint">
+    <span>Move cursor to steer &bull; Hold <span class="kbd">Click</span> or <span class="kbd">Space</span> for Turbo Dash &bull; Built by <a href="../portfolio/index.html" style="color: #38bdf8; text-decoration: none; font-weight: 600;">Harsh Sigar</a></span>
+  </footer>
+
+  <!-- Slide-out Settings & Skins Drawer -->
+  <aside class="settings-drawer" id="settingsDrawer" aria-label="Settings and Customization">
+    <div class="drawer-header">
+      <h3>Skins &amp; Settings</h3>
+      <button class="hud-icon-btn" id="closeSettings" aria-label="Close Settings">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="drawer-content">
+      <!-- Skin Picker -->
+      <div class="setting-group">
+        <label>Snake Skin</label>
+        <div class="skins-grid">
+          <div class="skin-card active" data-skin="viper">
+            <div class="skin-preview viper"></div>
+            <span>Cyber Viper</span>
+          </div>
+          <div class="skin-card" data-skin="drake">
+            <div class="skin-preview drake"></div>
+            <span>Magma Drake</span>
+          </div>
+          <div class="skin-card" data-skin="rainbow">
+            <div class="skin-preview rainbow"></div>
+            <span>Chromatic</span>
+          </div>
+          <div class="skin-card" data-skin="cosmic">
+            <div class="skin-preview cosmic"></div>
+            <span>Cosmic Void</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Snake Length Slider -->
+      <div class="setting-group">
+        <label>
+          <span>Body Length</span>
+          <span class="val" id="lenValDisp">45</span>
+        </label>
+        <input type="range" id="lenSlider" class="setting-slider" min="15" max="100" value="45" />
+      </div>
+
+      <!-- Wiggle Amplitude Slider -->
+      <div class="setting-group">
+        <label>
+          <span>Slither Wiggle</span>
+          <span class="val" id="wiggleValDisp">12</span>
+        </label>
+        <input type="range" id="wiggleSlider" class="setting-slider" min="0" max="30" value="12" />
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <a href="../portfolio/index.html" class="btn-portfolio">
+        <span>&larr; Back to Portfolio</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- JavaScript Modules -->
+  <script src="./js/sound.js"></script>
+  <script src="./js/snake.js"></script>
+  <script src="./js/ui.js"></script>
+</body>
+</html>
