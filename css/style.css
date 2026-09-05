@@ -1,0 +1,400 @@
+/* ==========================================================================
+   CURSOR SNAKE - MODERN STYLESHEET
+   Features: Fullscreen Canvas, Glassmorphism HUD, Controls Drawer, Animations
+   ========================================================================== */
+
+:root {
+  --bg-primary: #050811;
+  --bg-hud: rgba(15, 23, 42, 0.75);
+  --bg-hud-hover: rgba(30, 41, 59, 0.85);
+  --bg-drawer: rgba(10, 15, 29, 0.95);
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  
+  --accent-cyan: #38bdf8;
+  --accent-purple: #818cf8;
+  --accent-emerald: #34d399;
+  --accent-amber: #fbbf24;
+  --accent-rose: #f43f5e;
+  
+  --border-color: rgba(255, 255, 255, 0.1);
+  --border-glow: rgba(56, 189, 248, 0.4);
+  
+  --shadow-hud: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(56, 189, 248, 0.15);
+  --shadow-btn: 0 4px 12px rgba(0, 0, 0, 0.3);
+  
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 24px;
+  
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  --transition: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-primary);
+  font-family: var(--font-sans);
+  color: var(--text-primary);
+}
+
+/* --------------------------------------------------------------------------
+   1. FULLSCREEN CANVAS
+   -------------------------------------------------------------------------- */
+#snakeCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  touch-action: none;
+  z-index: 1;
+  cursor: crosshair;
+}
+
+/* --------------------------------------------------------------------------
+   2. TOP FLOATING HUD
+   -------------------------------------------------------------------------- */
+.hud-top {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-hud);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  padding: 8px 18px;
+  border-radius: 50px;
+  box-shadow: var(--shadow-hud);
+  max-width: 95vw;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.hud-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+  font-size: 1rem;
+  font-family: var(--font-mono);
+  color: var(--accent-cyan);
+}
+
+.hud-modes {
+  display: flex;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 3px;
+  border-radius: 30px;
+  border: 1px solid var(--border-color);
+}
+
+.mode-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.mode-btn.active {
+  background: var(--accent-cyan);
+  color: #050811;
+  box-shadow: 0 0 15px rgba(56, 189, 248, 0.4);
+}
+
+.hud-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.hud-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.hud-icon-btn:hover,
+.hud-icon-btn.active {
+  color: var(--text-primary);
+  border-color: var(--border-glow);
+  background: rgba(56, 189, 248, 0.15);
+  transform: scale(1.05);
+}
+
+/* --------------------------------------------------------------------------
+   3. STATS & SCORE HUD (FEAST MODE)
+   -------------------------------------------------------------------------- */
+.hud-stats {
+  position: fixed;
+  top: 90px;
+  left: 24px;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-hud);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-btn);
+}
+
+.stat-val {
+  color: var(--accent-cyan);
+}
+
+.boost-meter {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent-amber);
+}
+
+.turbo-active .boost-meter {
+  display: inline-flex;
+  animation: pulse 0.8s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.98); }
+}
+
+/* --------------------------------------------------------------------------
+   4. BOTTOM CONTROLS & INSTRUCTIONS HINT
+   -------------------------------------------------------------------------- */
+.hud-bottom-hint {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--bg-hud);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  padding: 8px 20px;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  pointer-events: none;
+  max-width: 90vw;
+  text-align: center;
+}
+
+.kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--accent-cyan);
+}
+
+/* --------------------------------------------------------------------------
+   5. SETTINGS & SKIN DRAWER
+   -------------------------------------------------------------------------- */
+.settings-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 340px;
+  max-width: 85vw;
+  height: 100%;
+  background: var(--bg-drawer);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-left: 1px solid var(--border-color);
+  z-index: 50;
+  transform: translateX(100%);
+  transition: transform var(--transition);
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
+}
+
+.settings-drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.drawer-header h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.drawer-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.setting-group label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.setting-group label span.val {
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+}
+
+.setting-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  outline: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+}
+
+.setting-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  cursor: pointer;
+  box-shadow: 0 0 10px var(--accent-cyan);
+}
+
+/* Skin Selector Grid */
+.skins-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.skin-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.skin-card:hover,
+.skin-card.active {
+  border-color: var(--accent-cyan);
+  background: rgba(56, 189, 248, 0.15);
+  color: #ffffff;
+}
+
+.skin-preview {
+  height: 8px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.skin-preview.viper { background: linear-gradient(90deg, #38bdf8, #34d399, #818cf8); }
+.skin-preview.drake { background: linear-gradient(90deg, #f59e0b, #ef4444, #f43f5e); }
+.skin-preview.rainbow { background: linear-gradient(90deg, #ec4899, #8b5cf6, #3b82f6, #10b981, #f59e0b); }
+.skin-preview.cosmic { background: linear-gradient(90deg, #c084fc, #6366f1, #38bdf8); }
+
+/* Quick Action Links */
+.drawer-footer {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-portfolio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-cyan);
+  color: #050811;
+  font-weight: 700;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.btn-portfolio:hover {
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.5);
+  transform: translateY(-2px);
+}
+
+/* --------------------------------------------------------------------------
+   6. RESPONSIVENESS
+   -------------------------------------------------------------------------- */
+@media (max-width: 600px) {
+  .hud-top {
+    top: 10px;
+    padding: 6px 12px;
+    gap: 8px;
+  }
+  .hud-brand { font-size: 0.85rem; }
+  .mode-btn { padding: 4px 10px; font-size: 0.75rem; }
+  .hud-bottom-hint { display: none; }
+  .hud-stats { top: 70px; left: 14px; }
+}
